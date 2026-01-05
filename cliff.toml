@@ -1,4 +1,4 @@
-# git-cliff configuration for k8stun
+# git-cliff configuration for kpipe
 # https://git-cliff.org/docs/configuration
 
 [changelog]
@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 # Template for the changelog body (applied to each release)
 body = """
 {%- macro remote_url() -%}
-  https://github.com/tsroka/k8stun
+  https://github.com/tsroka/kpipe
 {%- endmacro -%}
 
 {% if version -%}

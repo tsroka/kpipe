@@ -1,6 +1,6 @@
-# Releasing k8stun
+# Releasing kpipe
 
-This document describes how to create a new release of k8stun.
+This document describes how to create a new release of kpipe.
 
 ## Making a Release
 
@@ -18,7 +18,7 @@ refactor: restructure networking module
 
 ### 2. Trigger the Release Workflow
 
-1. Go to the [Actions tab](https://github.com/tsroka/k8stun/actions)
+1. Go to the [Actions tab](https://github.com/tsroka/kpipe/actions)
 2. Select the "Release" workflow from the left sidebar
 3. Click "Run workflow"
 4. Enter the version number (e.g., `1.0.0` or `1.0.0-beta.1`)
@@ -49,11 +49,11 @@ Each release includes:
 
 | Artifact | Description |
 |----------|-------------|
-| `k8stun-X.Y.Z-aarch64-apple-darwin.tar.gz` | macOS ARM64 binary |
-| `k8stun-X.Y.Z-x86_64-unknown-linux-gnu.tar.gz` | Linux x64 binary |
-| `k8stun-X.Y.Z-aarch64-unknown-linux-gnu.tar.gz` | Linux ARM64 binary |
-| `k8stun_X.Y.Z_amd64.deb` | Debian package for x64 |
-| `k8stun_X.Y.Z_arm64.deb` | Debian package for ARM64 |
+| `kpipe-X.Y.Z-aarch64-apple-darwin.tar.gz` | macOS ARM64 binary |
+| `kpipe-X.Y.Z-x86_64-unknown-linux-gnu.tar.gz` | Linux x64 binary |
+| `kpipe-X.Y.Z-aarch64-unknown-linux-gnu.tar.gz` | Linux ARM64 binary |
+| `kpipe_X.Y.Z_amd64.deb` | Debian package for x64 |
+| `kpipe_X.Y.Z_arm64.deb` | Debian package for ARM64 |
 | `SHA256SUMS.txt` | Checksums for all artifacts |
 
 ## Version Numbering
@@ -75,7 +75,7 @@ If the Linux ARM64 build fails, it may be due to missing cross-compilation depen
 ### Homebrew Tap Not Updated
 
 1. Verify `HOMEBREW_TAP_TOKEN` secret is correctly set
-2. Check the homebrew-k8stun repository's Actions tab for errors
+2. Check the homebrew-kpipe repository's Actions tab for errors
 3. Ensure the token has `repo` scope
 
 ### Changelog Not Generating

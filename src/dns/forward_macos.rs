@@ -209,7 +209,7 @@ impl DnsForwarder {
         );
 
         // Create dynamic store for reading/writing
-        let store = SCDynamicStoreBuilder::new("k8stun-dns-forwarder").build();
+        let store = SCDynamicStoreBuilder::new("kpipe-dns-forwarder").build();
 
         // Backup current DNS settings
         self.backup_dns_settings(&store)?;
@@ -245,7 +245,7 @@ impl DnsForwarder {
         self.stop_monitor();
 
         // Restore original DNS settings
-        let store = SCDynamicStoreBuilder::new("k8stun-dns-forwarder").build();
+        let store = SCDynamicStoreBuilder::new("kpipe-dns-forwarder").build();
 
         self.restore_dns_settings(&store)?;
 
@@ -429,7 +429,7 @@ fn run_dns_monitor(should_stop: Arc<std::sync::atomic::AtomicBool>, expected_dns
     };
 
     // Build dynamic store with callback
-    let store = SCDynamicStoreBuilder::new("k8stun-dns-monitor")
+    let store = SCDynamicStoreBuilder::new("kpipe-dns-monitor")
         .callback_context(context)
         .build();
 

@@ -1,4 +1,4 @@
-//! k8stun - Kubernetes Userspace Network Tunnel
+//! kpipe - Kubernetes Userspace Network Tunnel
 //!
 //! A transparent network tunnel that connects your local machine directly to
 //! a Kubernetes cluster, allowing you to access internal Kubernetes services
@@ -44,7 +44,7 @@ use vip::{PodId, ServiceId, TargetId, VipManager, VipManagerConfig};
 /// Creates a transparent network tunnel to access Kubernetes services
 /// from your local machine without modifying /etc/hosts.
 #[derive(Parser, Debug)]
-#[command(name = "k8stun")]
+#[command(name = "kpipe")]
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// Kubernetes namespaces to expose (comma-separated)
@@ -59,7 +59,7 @@ struct Args {
     #[arg(long, default_value = "true")]
     auto_discover: bool,
 
-    /// Log level for k8stun (trace, debug, info, warn, error)
+    /// Log level for kpipe (trace, debug, info, warn, error)
     #[arg(short, long, default_value = "info")]
     log_level: String,
 
@@ -107,8 +107,8 @@ async fn main() -> Result<()> {
     let app_level = args.log_level.to_lowercase();
     let lib_level = args.lib_log_level.to_lowercase();
 
-    // Build filter: k8stun at app_level, everything else at lib_level
-    let filter = EnvFilter::new(format!("{lib_level},k8stun={app_level}"));
+    // Build filter: kpipe at app_level, everything else at lib_level
+    let filter = EnvFilter::new(format!("{lib_level},kpipe={app_level}"));
 
     fmt::Subscriber::builder()
         .with_env_filter(filter)
@@ -120,7 +120,7 @@ async fn main() -> Result<()> {
         .init();
     let shutdown_notify = Arc::new(Notify::new());
 
-    info!("Starting k8stun - Kubernetes Userspace Network Tunnel");
+    info!("Starting kpipe - Kubernetes Userspace Network Tunnel");
     let components = FuturesUnordered::new();
 
     // Parse namespaces
@@ -283,7 +283,7 @@ async fn main() -> Result<()> {
 
     info!("");
     info!("===========================================");
-    info!("k8stun is ready!");
+    info!("kpipe is ready!");
     info!("===========================================");
     info!("");
     info!("You can now access Kubernetes services:");
@@ -370,7 +370,7 @@ async fn main() -> Result<()> {
         }
     }
 
-    info!("k8stun stopped");
+    info!("kpipe stopped");
     Ok(())
 }
 

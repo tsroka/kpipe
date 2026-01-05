@@ -1,6 +1,6 @@
-# k8stun - Kubernetes Userspace Network Tunnel
+# kpipe - Kubernetes Userspace Network Tunnel
 
-[![CI](https://github.com/tsroka/k8stun/actions/workflows/ci.yml/badge.svg)](https://github.com/tsroka/k8stun/actions/workflows/ci.yml)
+[![CI](https://github.com/tsroka/kpipe/actions/workflows/ci.yml/badge.svg)](https://github.com/tsroka/kpipe/actions/workflows/ci.yml)
 
 A transparent network tunnel that connects your local machine directly to a Kubernetes cluster. Access internal Kubernetes services (like `http://my-service.default`) from your local browser or terminal as if your laptop were physically inside the cluster network.
 
@@ -18,7 +18,7 @@ A transparent network tunnel that connects your local machine directly to a Kube
 
 ```
 ┌─────────────────────┐     ┌──────────────────────────────────┐     ┌─────────────┐
-│   Your Terminal     │     │         k8stun Process           │     │ Kubernetes  │
+│   Your Terminal     │     │         kpipe Process           │     │ Kubernetes  │
 │  curl app.default   │  →  │ TUN → lwIP stack → Port Forward  │  →  │    Pod      │
 └─────────────────────┘     └──────────────────────────────────┘     └─────────────┘
 ```
@@ -34,34 +34,34 @@ A transparent network tunnel that connects your local machine directly to a Kube
 ### macOS (Homebrew)
 
 ```bash
-brew install tsroka/k8stun/k8stun
+brew install tsroka/kpipe/kpipe
 ```
 
 ### Debian/Ubuntu
 
-Download the latest `.deb` package from the [releases page](https://github.com/tsroka/k8stun/releases):
+Download the latest `.deb` package from the [releases page](https://github.com/tsroka/kpipe/releases):
 
 ```bash
 # For x64
-curl -LO https://github.com/tsroka/k8stun/releases/latest/download/k8stun_VERSION_amd64.deb
-sudo dpkg -i k8stun_VERSION_amd64.deb
+curl -LO https://github.com/tsroka/kpipe/releases/latest/download/kpipe_VERSION_amd64.deb
+sudo dpkg -i kpipe_VERSION_amd64.deb
 
 # For ARM64
-curl -LO https://github.com/tsroka/k8stun/releases/latest/download/k8stun_VERSION_arm64.deb
-sudo dpkg -i k8stun_VERSION_arm64.deb
+curl -LO https://github.com/tsroka/kpipe/releases/latest/download/kpipe_VERSION_arm64.deb
+sudo dpkg -i kpipe_VERSION_arm64.deb
 ```
 
 ### From Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/tsroka/k8stun.git
-cd k8stun
+git clone https://github.com/tsroka/kpipe.git
+cd kpipe
 
 # Build the project
 cargo build --release
 
-# The binary will be at target/release/k8stun
+# The binary will be at target/release/kpipe
 ```
 
 ## Usage
@@ -70,16 +70,16 @@ cargo build --release
 
 ```bash
 # Basic usage - expose services in the default namespace
-sudo ./target/release/k8stun
+sudo ./target/release/kpipe
 
 # Expose services from multiple namespaces
-sudo ./target/release/k8stun --namespaces default,production,staging
+sudo ./target/release/kpipe --namespaces default,production,staging
 
 # Specify individual services
-sudo ./target/release/k8stun --services backend.default:8080,api.production:3000
+sudo ./target/release/kpipe --services backend.default:8080,api.production:3000
 
 # Enable debug logging
-sudo ./target/release/k8stun --log-level debug
+sudo ./target/release/kpipe --log-level debug
 ```
 
 ### CLI Options
@@ -104,7 +104,7 @@ Options:
 
 ### DNS Modes
 
-k8stun supports three DNS interception modes:
+kpipe supports three DNS interception modes:
 
 | Mode | Description | Platform |
 |------|-------------|----------|
@@ -114,21 +114,21 @@ k8stun supports three DNS interception modes:
 
 ```bash
 # Default mode - route DNS through TUN
-sudo k8stun --dns-mode tun_route
+sudo kpipe --dns-mode tun_route
 
 # Forward mode on macOS - modify system DNS settings
-sudo k8stun --dns-mode forward
+sudo kpipe --dns-mode forward
 
 # Disable DNS interception entirely
-sudo k8stun --dns-mode disabled
+sudo kpipe --dns-mode disabled
 ```
 
 ## Example Session
 
 ```bash
-$ sudo ./target/release/k8stun --namespaces default,production
+$ sudo ./target/release/kpipe --namespaces default,production
 
-Starting k8stun - Kubernetes Userspace Network Tunnel
+Starting kpipe - Kubernetes Userspace Network Tunnel
 Target namespaces: ["default", "production"]
 Connecting to Kubernetes cluster...
 Discovering services in target namespaces...
@@ -140,7 +140,7 @@ TUN device created: utun5
 Network stack initialized
 
 ===========================================
-k8stun is ready!
+kpipe is ready!
 ===========================================
 
 You can now access Kubernetes services:
@@ -173,7 +173,7 @@ $ curl http://172-17-0-3.default.pod:8080/
 
 ## Supported DNS Patterns
 
-k8stun supports the standard Kubernetes DNS naming conventions:
+kpipe supports the standard Kubernetes DNS naming conventions:
 
 ### Service DNS
 
@@ -206,10 +206,10 @@ This is particularly useful for:
 
 ## HTTP API
 
-k8stun can optionally expose an HTTP API for monitoring VIP allocations and connections. Enable it with `--http <port>`:
+kpipe can optionally expose an HTTP API for monitoring VIP allocations and connections. Enable it with `--http <port>`:
 
 ```bash
-sudo k8stun --http 8080
+sudo kpipe --http 8080
 ```
 
 ### Endpoints

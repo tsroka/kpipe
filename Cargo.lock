@@ -1415,7 +1415,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "k8stun"
+name = "kpipe"
 version = "0.3.0"
 dependencies = [
  "anyhow",

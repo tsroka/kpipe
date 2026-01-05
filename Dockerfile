@@ -44,15 +44,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user (the app will need elevated capabilities at runtime)
-RUN useradd -r -s /bin/false k8stun
+RUN useradd -r -s /bin/false kpipe
 
 WORKDIR /app
 
 # Copy binary from builder
-COPY --from=builder /app/target/release/k8stun /usr/local/bin/k8stun
+COPY --from=builder /app/target/release/kpipe /usr/local/bin/kpipe
 
 # Note: This application requires NET_ADMIN capability and access to /dev/net/tun
 # Run with: docker run --cap-add=NET_ADMIN --device=/dev/net/tun ...
 
-ENTRYPOINT ["/usr/local/bin/k8stun"]
+ENTRYPOINT ["/usr/local/bin/kpipe"]
 

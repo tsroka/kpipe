@@ -1,11 +1,11 @@
 [package]
-name = "k8stun"
+name = "kpipe"
 version = "0.3.0"
 edition = "2021"
 description = "Kubernetes Userspace Network Tunnel - transparent access to K8s services"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/tsroka/k8stun"
-homepage = "https://github.com/tsroka/k8stun"
+repository = "https://github.com/tsroka/kpipe"
+homepage = "https://github.com/tsroka/kpipe"
 readme = "README.md"
 keywords = ["kubernetes", "networking", "tunnel", "vpn", "k8s"]
 categories = ["network-programming", "command-line-utilities"]
@@ -87,7 +87,7 @@ maintainer = "Tomek Sroka <tomek@sroka.dev>"
 copyright = "2024, Tomek Sroka"
 license-file = ["LICENSE-MIT", "4"]
 extended-description = """\
-k8stun creates a transparent network tunnel that connects your local machine \
+kpipe creates a transparent network tunnel that connects your local machine \
 directly to a Kubernetes cluster. Access internal Kubernetes services \
 (like http://my-service.default) from your local browser or terminal \
 as if your laptop were physically inside the cluster network."""
@@ -95,6 +95,6 @@ depends = "$auto"
 section = "net"
 priority = "optional"
 assets = [
-    ["target/release/k8stun", "usr/bin/", "755"],
-    ["README.md", "usr/share/doc/k8stun/README", "644"],
+    ["target/release/kpipe", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/kpipe/README", "644"],
 ]

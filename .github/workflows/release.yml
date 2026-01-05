@@ -121,7 +121,7 @@ jobs:
         run: |
           VERSION=${{ needs.validate.outputs.version }}
           TARGET=${{ matrix.target }}
-          BINARY_NAME=k8stun
+          BINARY_NAME=kpipe
           
           cd target/$TARGET/release
           
@@ -137,7 +137,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: binary-${{ matrix.target }}
-          path: k8stun-*.tar.gz
+          path: kpipe-*.tar.gz
 
   build-deb:
     name: Build Debian Package - ${{ matrix.arch }}
@@ -193,13 +193,13 @@ jobs:
         run: |
           VERSION=${{ needs.validate.outputs.version }}
           ARCH=${{ matrix.arch }}
-          mv target/${{ matrix.target }}/debian/*.deb k8stun_${VERSION}_${ARCH}.deb
+          mv target/${{ matrix.target }}/debian/*.deb kpipe_${VERSION}_${ARCH}.deb
 
       - name: Upload deb artifact
         uses: actions/upload-artifact@v4
         with:
           name: deb-${{ matrix.arch }}
-          path: k8stun_*.deb
+          path: kpipe_*.deb
 
   release:
     name: Create GitHub Release
@@ -276,7 +276,7 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-          repository: tsroka/homebrew-k8stun
+          repository: tsroka/homebrew-kpipe
           event-type: release
           client-payload: |
             {
