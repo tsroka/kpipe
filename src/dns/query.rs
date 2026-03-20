@@ -392,7 +392,7 @@ impl DnsHandler {
                 // 2 parts = service.namespace (if namespace is known)
                 2 => {
                     let namespace = parts[1].to_lowercase();
-                    if namespaces.contains(&*namespace) {
+                    if namespaces.contains(&namespace) {
                         return K8sQueryType::Service {
                             name: parts[0].to_string(),
                             namespace: parts[1].to_string(),
@@ -402,7 +402,7 @@ impl DnsHandler {
                 // 3 parts = pod.service.namespace (if namespace is known)
                 3 => {
                     let namespace = parts[2].to_lowercase();
-                    if namespaces.contains(&*namespace) {
+                    if namespaces.contains(&namespace) {
                         return K8sQueryType::Pod(PodDnsInfo::StatefulSet {
                             pod_name: parts[0].to_string(),
                             service: parts[1].to_string(),

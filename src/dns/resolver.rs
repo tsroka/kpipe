@@ -326,7 +326,7 @@ impl DnsResolver {
         let service = ServiceId::new(service_name, namespace);
         if let Err(e) = self.k8s_client.get_service_endpoints(&service).await {
             info!(
-                "Service {}.{} not found in K8s: {}",
+                "Service {}.{} not found in K8s: {:?}",
                 service_name, namespace, e
             );
             return None;

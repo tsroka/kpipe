@@ -12,6 +12,7 @@
 //! https://github.com/mullvad/mullvadvpn-app/blob/main/talpid-dns/src/macos.rs
 
 use anyhow::{anyhow, Result};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::net::Ipv4Addr;
 use std::sync::{Arc, Mutex};
@@ -35,6 +36,9 @@ use tracing::{debug, info, warn};
 /// Standard DNS port.
 const DNS_PORT: u16 = 53;
 
+/// Path for persisting DNS backup to survive crashes.
+const DNS_BACKUP_PATH: &str = "/tmp/kpipe-dns-backup.json";
+
 /// Pattern to match all DNS state entries.
 const STATE_PATH_PATTERN: &str = "State:/Network/Service/.*/DNS";
 
@@ -42,7 +46,7 @@ const STATE_PATH_PATTERN: &str = "State:/Network/Service/.*/DNS";
 const SETUP_PATH_PATTERN: &str = "Setup:/Network/Service/.*/DNS";
 
 /// A single DNS configuration entry (for one network service).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct DnsSettings {
     /// DNS server addresses as strings.
     server_addresses: Vec<String>,
@@ -135,6 +139,108 @@ impl DnsSettings {
         );
         Ok(())
     }
+}
+
+/// File-based DNS backup for crash recovery.
+#[derive(Serialize, Deserialize)]
+struct DnsBackupFile {
+    created_at: String,
+    backup: HashMap<String, Option<DnsSettings>>,
+}
+
+/// Saves the DNS backup to a file so it survives crashes.
+fn save_backup_to_file(backup: &HashMap<String, Option<DnsSettings>>) -> Result<()> {
+    let backup_file = DnsBackupFile {
+        created_at: chrono::Utc::now().to_rfc3339(),
+        backup: backup.clone(),
+    };
+    let json = serde_json::to_string_pretty(&backup_file)?;
+    std::fs::write(DNS_BACKUP_PATH, json)?;
+    debug!("Saved DNS backup to {}", DNS_BACKUP_PATH);
+    Ok(())
+}
+
+/// Loads the DNS backup from file, if it exists.
+fn load_backup_from_file() -> Result<Option<HashMap<String, Option<DnsSettings>>>> {
+    let path = std::path::Path::new(DNS_BACKUP_PATH);
+    if !path.exists() {
+        return Ok(None);
+    }
+    let contents = std::fs::read_to_string(path)?;
+    let backup_file: DnsBackupFile = serde_json::from_str(&contents).map_err(|e| {
+        warn!(
+            "Corrupted DNS backup file at {}: {}. Deleting it.",
+            DNS_BACKUP_PATH, e
+        );
+        delete_backup_file();
+        anyhow!("corrupted DNS backup file: {}", e)
+    })?;
+    info!(
+        "Loaded DNS backup from {} (created at {})",
+        DNS_BACKUP_PATH, backup_file.created_at
+    );
+    Ok(Some(backup_file.backup))
+}
+
+/// Deletes the backup file, warning on failure.
+fn delete_backup_file() {
+    let path = std::path::Path::new(DNS_BACKUP_PATH);
+    if path.exists() {
+        if let Err(e) = std::fs::remove_file(path) {
+            warn!("Failed to delete DNS backup file {}: {}", DNS_BACKUP_PATH, e);
+        } else {
+            debug!("Deleted DNS backup file {}", DNS_BACKUP_PATH);
+        }
+    }
+}
+
+/// Restores DNS settings from a backup file left by a previous crashed session.
+///
+/// If no backup file exists, logs an info message and returns Ok.
+/// This can be called standalone (via `--restore-dns`) or automatically on startup.
+pub fn restore_dns_from_backup() -> Result<()> {
+    let backup = match load_backup_from_file() {
+        Ok(Some(backup)) => backup,
+        Ok(None) => {
+            info!("No DNS backup file found, nothing to restore");
+            return Ok(());
+        }
+        Err(_) => {
+            // load_backup_from_file already logged and deleted the corrupted file
+            info!("DNS backup file was corrupted, nothing to restore");
+            return Ok(());
+        }
+    };
+
+    info!(
+        "Restoring DNS settings from backup ({} services)...",
+        backup.len()
+    );
+    let store = SCDynamicStoreBuilder::new("kpipe-dns-restore").build();
+
+    for (path, settings_opt) in &backup {
+        match settings_opt {
+            Some(settings) => {
+                if let Err(e) = settings.save(&store) {
+                    warn!("Failed to restore DNS for {}: {}", path, e);
+                } else {
+                    debug!("Restored DNS for {}", path);
+                }
+            }
+            None => {
+                let path_cf = CFString::new(path);
+                if !store.remove(path_cf) {
+                    debug!("Could not remove DNS settings at {} (may not exist)", path);
+                } else {
+                    debug!("Removed DNS settings at {}", path);
+                }
+            }
+        }
+    }
+
+    delete_backup_file();
+    info!("DNS settings restored from backup");
+    Ok(())
 }
 
 /// State for the DNS forwarder.
@@ -301,6 +407,10 @@ impl DnsForwarder {
             "Backed up DNS settings from {} services",
             state.backup.len()
         );
+
+        // Persist backup to file before modifying DNS (so we can recover from crashes)
+        save_backup_to_file(&state.backup)?;
+
         Ok(())
     }
 
@@ -350,6 +460,7 @@ impl DnsForwarder {
         }
         state.backup.clear();
         state.current_settings = None;
+        delete_backup_file();
         info!("Restored original DNS settings");
         Ok(())
     }

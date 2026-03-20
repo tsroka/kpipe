@@ -97,6 +97,11 @@ struct Args {
     /// Port for the HTTP API server (0 to disable)
     #[arg(long, default_value = "0")]
     http: u16,
+
+    /// Restore DNS settings from a previous crashed session and exit.
+    /// Use this if DNS is broken after kpipe was killed unexpectedly.
+    #[arg(long)]
+    restore_dns: bool,
 }
 
 #[tokio::main]
@@ -118,6 +123,14 @@ async fn main() -> Result<()> {
         .with_line_number(args.log_source)
         .compact()
         .init();
+    #[cfg(target_os = "macos")]
+    {
+        dns::forward_macos::restore_dns_from_backup()?;
+        if args.restore_dns {
+            return Ok(());
+        }
+    }
+
     let shutdown_notify = Arc::new(Notify::new());
 
     info!("Starting kpipe - Kubernetes Userspace Network Tunnel");
@@ -212,6 +225,14 @@ async fn main() -> Result<()> {
     let async_device = tun_device
         .into_async_device()
         .context("Failed to extract async device from TUN")?;
+
+    // Auto-restore DNS from any leftover backup (previous crash recovery)
+    #[cfg(target_os = "macos")]
+    {
+        if let Err(e) = dns::forward_macos::restore_dns_from_backup() {
+            warn!("Failed to auto-restore DNS from backup: {}", e);
+        }
+    }
 
     // Set up DNS based on mode
     let dns_interceptor: Option<DnsInterceptor> = None;
